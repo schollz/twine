@@ -90,6 +90,26 @@ local function setup_params()
   params:bang()
 end
 
+function setup_grid() 
+  local pad_left = {1,1}
+  local pad_right = {9,1}
+  g = grid.connect()
+  local num_values = 8*g.cols/2
+  g.key = function(x,y,z)
+    if x > g.cols/2 then 
+      pad_right = {x,y}
+      params:set("1seek",util.linlin(1,num_values,0,100,(x-g.cols/2)+(y-1)*8))
+    else
+      pad_left = {x,y}
+      params:set("2seek",util.linlin(1,num_values,0,100,x+(y-1)*8))
+    end
+    g:all(0)
+    g:led(pad_left[1],pad_left[2],15)
+    g:led(pad_right[1],pad_right[2],15)
+    g:refresh()
+  end
+end
+
 local function random_float(l, h)
     return l + math.random()  * (h - l);
 end
@@ -125,16 +145,17 @@ end
 function init()
   setup_params()
   setup_engine()
+  setup_grid()
 end
 
 function enc(n, d)
   if n == 1 then
-    params:delta("1volume", d)
-    params:delta("2volume", d)
   elseif n == 2 then
-    params:delta("1seek", d)
+    -- params:delta("1seek", d)
+    params:delta("1volume", d)
   elseif n == 3 then
-    params:delta("2seek", d)
+    -- params:delta("2seek", d)
+    params:delta("2volume", d)
   end
   
   redraw()
